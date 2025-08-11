@@ -81,9 +81,9 @@
 
     <!-- Center: mannequin / canvas -->
     <section class="flex-1 flex items-start justify-center">
-      <div id="canvas" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow p-4 overflow-hidden touch-none min-h-[700px]">
+      <div id="canvas" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow p-4 overflow-hidden touch-none min-h-[700px] flex flex-col items-center">
         <!-- Mannequin SVG (inline, subtle) -->
-        <svg id="mannequinSVG" viewBox="0 0 320 720" class="w-full h-auto mb-2" aria-hidden="true">
+        <svg id="mannequinSVG" viewBox="0 0 320 720" class="w-full h-auto mb-2" aria-hidden="true" style="display:block; margin:auto;">
           <defs>
             <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#eef2ff"/><stop offset="1" stop-color="#f0fdf4"/></linearGradient>
           </defs>
@@ -94,7 +94,6 @@
             <ellipse cx="147" cy="600" rx="60" ry="35" class="mannequin-silhouette" />
           </g>
         </svg>
-
         <!-- Parts (absolute positioned inside canvas) -->
         <img id="img-head" class="part-img absolute" alt="head part" hidden>
         <img id="img-upper" class="part-img absolute" alt="upper part" hidden>
@@ -143,15 +142,17 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <script>
     // ========== State & PARTS ===========
+    // CenterX is the center of the mannequin SVG in px (for 320px SVG)
+    const MANNEQUIN_CENTER_X = 160;
     const PARTS = {
-      head: { w:80,h:80, left:140, shape:'circle' },
-      upper:{ w:180,h:130, left:48, shape:'round' },
-      legs:{ w:143,h:230,left:68, shape:'round' },
-      feet:{ w:120,h:70,left:87, shape:'circle' }
+      head: { w:80,h:80, shape:'circle', overlap: 8 },
+      upper:{ w:180,h:130, shape:'round', overlap: 14 },
+      legs:{ w:143,h:230, shape:'round', overlap: 18 },
+      feet:{ w:120,h:70, shape:'circle', overlap: 0 }
     };
 
     let outfit = { head:null, upper:null, legs:null, feet:null };
-    let outfitPhotos = { head:null, upper:null, legs:null, feet:null }; // id refs to IDB
+    let outfitPhotos = { head:null, upper:null, legs:null, feet:null };
     let presets = [];
 
     const fileEls = {
@@ -214,7 +215,7 @@
       el.addEventListener('change', ()=>{ const f = el.files && el.files[0]; if(!f) return; if(!f.type.startsWith('image/')){ alert('Choose an image'); return; } if(f.size > 7*1024*1024){ alert('Max size 7MB'); return; } const r = new FileReader(); r.onload=()=> openCrop(r.result, part); r.readAsDataURL(f); });
     });
 
-    // ========== render photos and stack them ==========
+    // ========== render photos and stack them, with centering ==========
     async function renderPhotos(){
       // First, get all blobs and dimensions
       let images = {};
@@ -235,48 +236,93 @@
       renderLabels();
     }
 
-    // Stack placement: each part connects to the previous
+    // Stack placement: each part connects to the previous and the skeleton is centered
     function placeStackedParts(){
       const canvasEl = document.getElementById('canvas');
       const bw = canvasEl.clientWidth;
       const scale = bw / 320;
       const order = ['head','upper','legs','feet'];
-      const overlap = { head: 10, upper: 16, legs: 24 }; // px to overlap for each connection
-      let top = 32*scale;
-      let prev = null;
+      let top = 32 * scale;
+      const imgRects = {};
+      // First pass: compute sizes for each part
       for(const part of order){
         const img = imgEls[part];
         const meta = PARTS[part];
         const w = meta.w * scale;
         const h = meta.h * scale;
-        const left = meta.left * scale;
-        if(img && !img.hidden){
-          img.style.width = w+'px'; img.style.height = h+'px';
-          img.style.left = left+'px';
-          img.style.borderRadius = meta.shape==='circle'? '9999px': '12px';
-          if(prev){
-            // connect: snap top to previous bottom - overlap
-            img.style.top = (top - overlap[prev] || 0)+'px';
-            top = (parseFloat(img.style.top) + h);
-          }else{
-            img.style.top = top+'px';
-            top = top + h;
+        img.style.width = w+'px'; img.style.height = h+'px';
+        img.style.borderRadius = meta.shape==='circle'? '9999px': '12px';
+        img.style.position = 'absolute';
+        imgRects[part] = {w, h, meta};
+      }
+      // Second pass: vertical stacking
+      let y = top;
+      for(let i = 0; i < order.length; ++i){
+        const part = order[i];
+        const img = imgEls[part];
+        const {w, h, meta} = imgRects[part];
+        if(img.hidden) continue;
+        if(part === 'head' && !imgEls.upper.hidden){
+          // Center head horizontally on upper, put base of head flush to upper's top
+          const upper = imgEls.upper;
+          img.style.left = (upper.offsetLeft + (upper.width - w)/2) + 'px';
+          img.style.top = (upper.offsetTop - h + PARTS[part].overlap) + 'px';
+        } else if (part === 'upper' && !imgEls.head.hidden){
+          // Center upper on canvas (for initial alignment)
+          img.style.left = ((bw - w) / 2) + 'px';
+          img.style.top = y + 'px';
+        } else if(i > 0){
+          // Connect this part to the previous visible part
+          let prevIdx = i-1;
+          while(prevIdx >= 0 && imgEls[order[prevIdx]].hidden) prevIdx--;
+          if(prevIdx >= 0){
+            const prev = imgEls[order[prevIdx]];
+            img.style.left = (prev.offsetLeft + (prev.width - w)/2) + 'px';
+            img.style.top = (prev.offsetTop + prev.height - PARTS[order[prevIdx]].overlap) + 'px';
+          } else {
+            img.style.left = ((bw - w) / 2) + 'px';
+            img.style.top = y + 'px';
           }
-          prev = part;
+        } else {
+          // If first part and not head, center horizontally
+          img.style.left = ((bw - w) / 2) + 'px';
+          img.style.top = y + 'px';
         }
       }
+      // Center the whole figure horizontally as a group
+      // Find min/max left/right of all visible images
+      let minLeft = Infinity, maxRight = -Infinity;
+      order.forEach(part=>{
+        const img = imgEls[part];
+        if(!img.hidden){
+          const l = parseFloat(img.style.left); const r = l + img.width;
+          if(l < minLeft) minLeft = l;
+          if(r > maxRight) maxRight = r;
+        }
+      });
+      if(minLeft < Infinity && maxRight > -Infinity){
+        const groupWidth = maxRight - minLeft;
+        const canvasWidth = canvasEl.clientWidth;
+        const shift = (canvasWidth - groupWidth) / 2 - minLeft;
+        order.forEach(part=>{
+          const img = imgEls[part];
+          if(!img.hidden){
+            img.style.left = (parseFloat(img.style.left) + shift) + 'px';
+          }
+        });
+      }
       // Place choose buttons where parts are
-      for(const [part,meta] of Object.entries(PARTS)){
+      for(const part of order){
         const btn = document.querySelector(`button.choose-btn[data-part="${part}"]`);
         const img = imgEls[part];
         if(btn && img && !img.hidden){
           const bwid = Math.max(36, Math.min(80, img.width*0.28));
           const bht = Math.max(28, Math.min(48, img.height*0.18));
-          btn.style.left = (parseFloat(img.style.left) + (img.width-bwid)/2) + 'px';
-          btn.style.top = (parseFloat(img.style.top) + (img.height-bht)/2) + 'px';
+          btn.style.left = (img.offsetLeft + (img.width-bwid)/2) + 'px';
+          btn.style.top = (img.offsetTop + (img.height-bht)/2) + 'px';
           btn.style.width = bwid + 'px';
           btn.style.height = bht + 'px';
-          btn.style.borderRadius = meta.shape==='circle' ? '9999px' : '8px';
+          btn.style.borderRadius = PARTS[part].shape==='circle' ? '9999px' : '8px';
           btn.hidden = false;
         } else if(btn) {
           btn.hidden = true;
@@ -298,7 +344,7 @@
     labelSave.addEventListener('click', ()=>{ if(!labelFor) return; const v = labelInput.value.trim(); outfit[labelFor] = v || null; persistState(); renderLabels(); labelModal.classList.remove('flex'); labelModal.classList.add('hidden'); });
     labelClear.addEventListener('click', ()=>{ if(!labelFor) return; outfit[labelFor] = null; persistState(); renderLabels(); labelModal.classList.remove('flex'); labelModal.classList.add('hidden'); });
 
-    function renderLabels(){ document.querySelectorAll('.js-label').forEach(n=>n.remove()); const canvasEl = document.getElementById('canvas'); const scale = canvasEl.clientWidth / 320; let top = 0; for(const [part,val] of Object.entries(outfit)){ if(!val) continue; const img = imgEls[part]; if(img && !img.hidden){ const span = document.createElement('div'); span.className='js-label absolute px-3 py-1 rounded-full bg-white/90 dark:bg-gray-800/80 text-sm font-semibold shadow-md'; span.textContent = val; canvasEl.appendChild(span); const imgRect = img.getBoundingClientRect(); const canvasRect = canvasEl.getBoundingClientRect(); const topPos = img.offsetTop + img.height + 4; span.style.top = topPos+'px'; span.style.left = (img.offsetLeft + img.width/2 - span.offsetWidth/2) + 'px'; } }
+    function renderLabels(){ document.querySelectorAll('.js-label').forEach(n=>n.remove()); const canvasEl = document.getElementById('canvas'); const scale = canvasEl.clientWidth / 320; for(const [part,val] of Object.entries(outfit)){ if(!val) continue; const img = imgEls[part]; if(img && !img.hidden){ const span = document.createElement('div'); span.className='js-label absolute px-3 py-1 rounded-full bg-gray-900/90 dark:bg-gray-800/90 text-sm font-semibold shadow-md text-white'; span.textContent = val; canvasEl.appendChild(span); const top = img.offsetTop + img.height + 4; span.style.top = top+'px'; span.style.left = (img.offsetLeft + img.width/2 - span.offsetWidth/2) + 'px'; } }
     }
 
     // ========== preset handling ===========
@@ -307,7 +353,7 @@
     document.getElementById('randomBtn').addEventListener('click', ()=>{ for(const p of Object.keys(outfit)){ const opts = {head:['Cap','Hat','Bandana','None'], upper:['T-shirt','Jacket','Dress','Sweater','Shirt'], legs:['Jeans','Skirt','Shorts','Trousers'], feet:['Sneakers','Boots','Sandals','Dress shoes'] }[p]; outfit[p] = opts[Math.floor(Math.random()*opts.length)]; } persistState(); renderLabels(); });
 
     async function saveCurrentPreset(){ const name = prompt('Preset name'); if(!name) return; // build thumbnail
-      const cw=160,ch=360; const c=document.createElement('canvas'); c.width=cw; c.height=ch; const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cw,ch); for(const part of ['head','upper','legs','feet']){ const id = outfitPhotos[part]; if(!id) continue; const blob = await IDB.get(id); if(!blob) continue; const img = await blobToImage(blob); const ref = PARTS[part]; const scale = cw/320; ctx.drawImage(img, ref.left*scale, ref.top*scale, ref.w*scale, ref.h*scale); }
+      const cw=160,ch=360; const c=document.createElement('canvas'); c.width=cw; c.height=ch; const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cw,ch); for(const part of ['head','upper','legs','feet']){ const id = outfitPhotos[part]; if(!id) continue; const blob = await IDB.get(id); if(!blob) continue; const img = await blobToImage(blob); const ref = PARTS[part]; const scale = cw/320; ctx.drawImage(img, (MANNEQUIN_CENTER_X-ref.w/2)*scale, ref.overlap?ref.overlap*scale:0, ref.w*scale, ref.h*scale); }
       const thumb = c.toDataURL('image/png'); const entry = { name, outfit:{...outfit}, photos:{...outfitPhotos}, thumb, created: Date.now() }; presets.unshift(entry); persistPresets(); alert('Saved'); }
 
     function renderPresets(){ presetList.innerHTML=''; presets.forEach((p,idx)=>{ const li=document.createElement('li'); li.className='flex items-center gap-2 p-2 rounded-md bg-gray-50 dark:bg-gray-700'; li.innerHTML = `<div class="w-12 h-28 overflow-hidden rounded-md"><img src="${p.thumb}" class="w-full h-full object-cover"/></div><div class="flex-1 text-sm">${p.name}</div>`; const btns = document.createElement('div'); btns.className='flex gap-1'; const load=document.createElement('button'); load.textContent='Load'; load.className='px-2 py-1 rounded bg-emerald-500 text-white text-sm'; load.addEventListener('click', ()=>{ outfit = {...p.outfit}; outfitPhotos = {...p.photos}; persistState(); renderLabels(); renderPhotos(); }); const del=document.createElement('button'); del.textContent='Del'; del.className='px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-sm'; del.addEventListener('click', ()=>{ if(confirm('Delete preset?')){ presets.splice(idx,1); persistPresets(); }}); btns.append(load,del); li.appendChild(btns); presetList.appendChild(li); }); }
