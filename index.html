@@ -138,8 +138,8 @@
       z-index: 2;
       box-shadow: 0 2px 16px 2px rgba(0,0,0,0.06);
       background: #fff;
-      /* Will be sized/positioned in JS */
       object-fit: cover;
+      /* width/height/left/top set dynamically */
     }
     /* Transparent, visible overlay part buttons for clothing selection */
     .part-btn {
@@ -330,12 +330,12 @@
   <!-- Cropper.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <script>
-    // SVG part dimensions/positions (should match your SVG and CSS)
+    // SVG part dimensions (width/height) for cropping
     const PARTS = {
-      head:  { left: 140, top: 32, width: 80, height: 80, aspect: 1,   shape: "ellipse" },
-      upper: { left: 48,  top: 120, width: 180, height: 130, aspect: 180/130, shape: "rect" },
-      legs:  { left: 68,  top: 320, width: 143, height: 230, aspect: 143/230, shape: "rect" },
-      feet:  { left: 87,  top: 565, width: 120, height: 70,  aspect: 120/70,  shape: "ellipse" }
+      head:  { width: 80, height: 80, aspect: 1,   shape: "ellipse", left: 140 },
+      upper: { width: 180, height: 130, aspect: 180/130, shape: "rect", left: 48 },
+      legs:  { width: 143, height: 230, aspect: 143/230, shape: "rect", left: 68 },
+      feet:  { width: 120, height: 70,  aspect: 120/70,  shape: "ellipse", left: 87 }
     };
 
     let outfit = { head: null, upper: null, legs: null, feet: null };
@@ -376,19 +376,20 @@
       cropImg.src = dataURL;
       cropModal.style.display = 'flex';
 
-      if (cropper) cropper.destroy();
-      // Set aspect ratio per part
-      cropper = new Cropper(cropImg, {
-        aspectRatio: PARTS[part].aspect,
-        viewMode: 1,
-        movable: true,
-        zoomable: true,
-        scalable: true,
-        rotatable: false,
-        dragMode: 'move',
-        responsive: true,
-        autoCropArea: 1
-      });
+      setTimeout(() => { // Cropper needs image to be visible
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(cropImg, {
+          aspectRatio: PARTS[part].aspect,
+          viewMode: 1,
+          movable: true,
+          zoomable: true,
+          scalable: true,
+          rotatable: false,
+          dragMode: 'move',
+          responsive: true,
+          autoCropArea: 1
+        });
+      }, 100);
 
       document.getElementById('cropSaveBtn').onclick = () => saveCrop(part);
     }
@@ -402,6 +403,7 @@
 
     function saveCrop(part) {
       const dims = PARTS[part];
+      if (!cropper) return;
       // Get cropped image, at SVG part's display size
       const croppedDataURL = cropper.getCroppedCanvas({
         width: dims.width,
@@ -412,25 +414,43 @@
       displayPhotos();
     }
 
+    // --- Stack body parts vertically so they touch ---
     function displayPhotos() {
-      for (const part in PARTS) {
+      // Order matters for stacking
+      const order = ['head','upper','legs','feet'];
+      let top = 32;
+      const overlap = 14; // px overlap for 'seam'
+      function placeNext(i, currTop) {
+        if (i >= order.length) return;
+        const part = order[i];
         const img = document.getElementById('img-' + part);
         const dims = PARTS[part];
         if (outfitPhotos[part]) {
           img.src = outfitPhotos[part];
           img.hidden = false;
+          img.style.position = "absolute";
           img.style.left = dims.left + 'px';
-          img.style.top = dims.top + 'px';
           img.style.width = dims.width + 'px';
           img.style.height = dims.height + 'px';
           img.style.borderRadius = (dims.shape === "ellipse" ? "50%" : "16px");
           img.style.clipPath = (dims.shape === "ellipse"
             ? `ellipse(50% 50% at 50% 50%)`
             : "none");
+          img.onload = function() {
+            img.style.top = currTop + 'px';
+            placeNext(i+1, currTop + img.height - overlap);
+          };
+          // If already loaded (cache):
+          if (img.complete && img.naturalHeight) {
+            img.style.top = currTop + 'px';
+            placeNext(i+1, currTop + img.height - overlap);
+          }
         } else {
           img.hidden = true;
+          placeNext(i+1, currTop); // skip this one
         }
       }
+      placeNext(0, top);
     }
 
     // --- Presets, outfit, etc ---
