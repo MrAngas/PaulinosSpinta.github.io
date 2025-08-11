@@ -1,581 +1,345 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <title>Paulinos spinta</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Cropper.js CSS -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Paulinos Spinta — Modern</title>
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
   <style>
-    :root {
-      --pastel-green: #d7fbe8;
-      --outline: #3d6652;
-      --highlight: #b2e5c8;
-    }
-    body {
-      margin: 0; padding: 0;
-      min-height: 100vh;
-      background: var(--pastel-green);
-      font-family: 'Segoe UI', Arial, sans-serif;
-      color: #29443a;
-    }
-    header {
-      text-align: center;
-      padding: 32px 0 12px 0;
-      font-size: 2.5rem;
-      font-weight: bold;
-      letter-spacing: 2px;
-      background: transparent;
-    }
-    main {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      position: relative;
-      gap: 32px;
-      min-height: 400px;
-    }
-    .sidebars-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      min-width: 210px;
-      max-width: 240px;
-    }
-    .sidebar,
-    .uploadbar {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      background: rgba(255,255,255,0.45);
-      border-radius: 18px;
-      padding: 20px 16px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-      align-self: flex-start;
-      width: 100%;
-      max-width: 240px;
-    }
-    .sidebar button,
-    .uploadbar button {
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      background: var(--highlight);
-      color: #29443a;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.18s;
-      margin-bottom: 2px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .sidebar button:hover, .sidebar button:focus,
-    .uploadbar button:hover, .uploadbar button:focus {
-      background: #b2e7c9;
-      outline: 2px solid #3d6652;
-    }
-    .preset-list {
-      margin-top: 7px;
-      list-style: none;
-      padding: 0;
-      max-height: 120px;
-      overflow-y: auto;
-    }
-    .preset-list li {
-      background: #e8fff3;
-      margin-bottom: 4px;
-      padding: 5px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.98rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 4px;
-    }
-    .preset-list li:hover {
-      background: #c5ecd7;
-    }
-    .preset-action-btn {
-      background: none;
-      border: none;
-      color: #3d6652;
-      font-size: 1.1em;
-      cursor: pointer;
-      padding: 0 5px;
-      transition: color 0.15s;
-      border-radius: 3px;
-      margin-left: 6px;
-    }
-    .preset-action-btn:hover {
-      color: #ce3b3b;
-      background: #fbe8e8;
-    }
-    .uploadbar label {
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    input[type="file"] { display: none; }
-
-    .human-container {
-      position: relative;
-      width: 320px;
-      min-height: 700px;
-      margin: 0 auto;
-      background: none;
-    }
-    .body-outline {
-      position: absolute;
-      left: 0; top: 0;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .part-img {
-      position: absolute;
-      z-index: 2;
-      box-shadow: 0 2px 16px 2px rgba(0,0,0,0.06);
-      background: #fff;
-      object-fit: cover;
-      /* width/height/left/top set dynamically */
-    }
-    /* Transparent, visible overlay part buttons for clothing selection */
-    .part-btn {
-      position: absolute;
-      background: rgba(220, 255, 241, 0.28);
-      border: 2px dashed #6fdca2;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-      z-index: 3;
-      outline: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4em;
-      color: #3d6652;
-      opacity: 0.88;
-    }
-    .part-btn:focus {
-      border-color: #3d6652;
-      background: rgba(104, 194, 141, 0.18);
-    }
-    .part-btn:hover {
-      background: rgba(104, 194, 141, 0.13);
-      border-color: #3d6652;
-    }
-    .btn-head { left: 140px; top: 32px; width: 80px; height: 80px; border-radius: 50%; }
-    .btn-upper { left: 48px; top: 120px; width: 180px; height: 130px; border-radius: 65px; }
-    .btn-legs { left: 68px; top: 320px; width: 143px; height: 230px; border-radius: 32px; }
-    .btn-feet { left: 87px; top: 565px; width: 120px; height: 70px; border-radius: 35px; }
-
-    .outfit-label {
-      pointer-events: none;
-      font-size: 1rem;
-      color: #29443a;
-      box-shadow: 0 1px 4px rgba(60,60,60,0.08);
-      font-weight: bold;
-      background: rgba(255,255,255,0.68);
-      border-radius: 6px;
-      position: absolute;
-      width: 90px;
-      text-align: center;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 6;
-      padding: 2px 0;
-      user-select: none;
-    }
-    .label-head { top: 90px;}
-    .label-upper { top: 240px;}
-    .label-legs { top: 550px;}
-    .label-feet { top: 635px;}
-
-    /* Cropper Modal */
-    #cropModal {
-      display: none;
-      position: fixed;
-      z-index: 100;
-      left: 0; top: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      align-items: center;
-      justify-content: center;
-    }
-    #cropModalContent {
-      background: #fff;
-      padding: 18px 18px 12px 18px;
-      border-radius: 14px;
-      box-shadow: 0 2px 40px 0 rgba(0,0,0,0.23);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      max-width: 95vw;
-      max-height: 85vh;
-    }
-    #cropImg {
-      max-width: 70vw;
-      max-height: 55vh;
-      margin-bottom: 12px;
-      border-radius: 10px;
-      background: #eee;
-    }
-    #cropModalContent button {
-      margin: 0 6px;
-    }
-    @media (max-width: 900px) {
-      main {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        min-height: unset;
-      }
-      .sidebars-wrap {
-        flex-direction: row;
-        width: 100vw;
-        max-width: 100vw;
-        gap: 6vw;
-        justify-content: space-around;
-        min-width: unset;
-        max-width: unset;
-      }
-      .sidebar, .uploadbar {
-        min-width: unset;
-        width: 48vw;
-        max-width: 48vw;
-        padding: 13px 2vw;
-      }
-      .human-container {
-        width: 98vw;
-        min-height: 440px;
-        max-width: 350px;
-      }
-      .body-outline { width: 100% !important; height: auto !important; }
-      .outfit-label,
-      .part-img,
-      .btn-head,
-      .btn-upper,
-      .btn-legs,
-      .btn-feet {
-        transform: scale(0.85) translateX(-58%);
-        left: 58%;
-      }
-      .preset-list {
-        max-height: 60px;
-      }
-      #cropImg {
-        max-width: 95vw;
-        max-height: 40vh;
-      }
-    }
+    :root{--accent:#10b981}
+    html,body{height:100%}
+    body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+    .part-img{transition:transform .28s ease,opacity .25s ease}
+    .preset-thumb img{transition:transform .18s ease}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+    .modal-backdrop{z-index:60}
+    .mannequin-silhouette{fill:var(--mannequin, #e6e9ee)}
+    .dark .mannequin-silhouette{fill: #1f2937}
+    input[type=file]{display:none}
   </style>
 </head>
-<body>
-  <header>
-    Paulinos spinta
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col">
+  <header class="flex items-center justify-between px-4 py-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="text-lg font-semibold">Paulinos Spinta</div>
+      <div class="text-xs text-gray-500 dark:text-gray-400">Modern rebuild • touch friendly</div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="exportBtn" class="px-3 py-1 rounded bg-white dark:bg-gray-700 text-sm">Export</button>
+      <button id="darkToggle" class="px-3 py-1 rounded bg-gray-100 dark:bg-gray-700 text-sm">Toggle</button>
+    </div>
   </header>
-  <main>
-    <div class="sidebars-wrap">
-      <div class="uploadbar">
-        <label>Upload photos:</label>
-        <button onclick="triggerFile('head')" title="Upload photo for head">📷 Head</button>
-        <input type="file" accept="image/*" id="file-head" onchange="handlePhoto('head')">
-        <button onclick="triggerFile('upper')" title="Upload photo for upper body">📷 Upper</button>
-        <input type="file" accept="image/*" id="file-upper" onchange="handlePhoto('upper')">
-        <button onclick="triggerFile('legs')" title="Upload photo for legs">📷 Legs</button>
-        <input type="file" accept="image/*" id="file-legs" onchange="handlePhoto('legs')">
-        <button onclick="triggerFile('feet')" title="Upload photo for feet">📷 Feet</button>
-        <input type="file" accept="image/*" id="file-feet" onchange="handlePhoto('feet')">
+
+  <main class="flex-1 flex flex-col md:flex-row gap-4 p-4 max-w-6xl w-full mx-auto">
+    <!-- Left: controls / presets -->
+    <aside class="w-full md:w-72 flex-shrink-0 flex flex-col gap-3">
+      <div class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow">
+        <div class="text-sm font-semibold mb-2">Uploads</div>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="flex items-center gap-2 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-700 cursor-pointer shadow-sm" for="file-head">📷 <span class="text-sm">Head</span>
+            <input id="file-head" type="file" accept="image/*">
+          </label>
+          <label class="flex items-center gap-2 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-700 cursor-pointer shadow-sm" for="file-upper">📷 <span class="text-sm">Upper</span>
+            <input id="file-upper" type="file" accept="image/*">
+          </label>
+          <label class="flex items-center gap-2 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-700 cursor-pointer shadow-sm" for="file-legs">📷 <span class="text-sm">Legs</span>
+            <input id="file-legs" type="file" accept="image/*">
+          </label>
+          <label class="flex items-center gap-2 py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-700 cursor-pointer shadow-sm" for="file-feet">📷 <span class="text-sm">Feet</span>
+            <input id="file-feet" type="file" accept="image/*">
+          </label>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">Max 7MB per file. Images saved in browser IndexedDB.</p>
       </div>
-      <div class="sidebar">
-        <button onclick="randomizeOutfit()" aria-label="Randomize outfit">🎲 Randomize</button>
-        <button onclick="savePreset()" aria-label="Save current outfit as preset">💾 Save Preset</button>
-        <label style="margin-bottom:0.3em;">Preset Library:</label>
-        <ul class="preset-list" id="presetList"></ul>
-      </div>
-    </div>
-    <div class="human-container">
-      <!-- SVG Outline for reference -->
-      <svg class="body-outline" width="320" height="720" viewBox="0 0 320 720">
-        <ellipse cx="180" cy="70" rx="48" ry="48" stroke="#3d6652" stroke-width="5" fill="none"/>
-        <rect x="70" y="120" width="180" height="130" rx="65" stroke="#3d6652" stroke-width="5" fill="none"/>
-        <rect x="68" y="320" width="143" height="230" rx="32" stroke="#3d6652" stroke-width="5" fill="none"/>
-        <ellipse cx="147" cy="600" rx="60" ry="35" stroke="#3d6652" stroke-width="5" fill="none"/>
-      </svg>
-      <img id="img-head"  class="part-img" src="" alt="Head" hidden>
-      <img id="img-upper" class="part-img" src="" alt="Upper Body" hidden>
-      <img id="img-legs"  class="part-img" src="" alt="Legs" hidden>
-      <img id="img-feet"  class="part-img" src="" alt="Feet" hidden>
-      <!-- Transparent, but visible, buttons for each body part -->
-      <button class="part-btn btn-head" aria-label="Choose hat or headwear" title="Choose hat or headwear" onclick="choosePart('head')">👒</button>
-      <button class="part-btn btn-upper" aria-label="Choose shirt or dress" title="Choose shirt or dress" onclick="choosePart('upper')">👕</button>
-      <button class="part-btn btn-legs" aria-label="Choose pants or skirt" title="Choose pants or skirt" onclick="choosePart('legs')">👖</button>
-      <button class="part-btn btn-feet" aria-label="Choose shoes" title="Choose shoes" onclick="choosePart('feet')">👟</button>
-    </div>
-    <!-- Cropper Modal -->
-    <div id="cropModal">
-      <div id="cropModalContent">
-        <div style="font-weight:bold; margin-bottom:10px;">Crop image to fit the body part</div>
-        <img id="cropImg" src="" alt="Crop area">
-        <div style="margin-top:8px;">
-          <button id="cropSaveBtn">Save Crop</button>
-          <button onclick="closeCropModal()">Cancel</button>
+
+      <div class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <div class="text-sm font-semibold">Outfit</div>
+          <div class="text-xs text-gray-500">Quick actions</div>
+        </div>
+        <div class="flex gap-2">
+          <button id="randomBtn" class="flex-1 py-2 rounded-md bg-emerald-500 text-white text-sm">🎲 Random</button>
+          <button id="savePreset" class="flex-1 py-2 rounded-md bg-gray-100 dark:bg-gray-700 text-sm">💾 Save</button>
+        </div>
+        <div class="mt-2">
+          <div class="text-xs text-gray-500 mb-1">Presets</div>
+          <ul id="presetList" class="flex flex-col gap-2 max-h-56 overflow-auto"></ul>
         </div>
       </div>
-    </div>
+
+      <div class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow">
+        <div class="text-sm font-semibold mb-2">Options</div>
+        <div class="flex flex-col gap-2">
+          <label class="flex items-center gap-2"><input id="darkPref" type="checkbox" class="mr-2">Dark mode</label>
+          <label class="flex items-center gap-2"><input id="showContours" type="checkbox" class="mr-2" checked>Show mannequin</label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center: mannequin / canvas -->
+    <section class="flex-1 flex items-start justify-center">
+      <div id="canvas" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow p-4 overflow-hidden touch-none min-h-[700px]">
+        <!-- Mannequin SVG (inline, subtle) -->
+        <svg id="mannequinSVG" viewBox="0 0 320 720" class="w-full h-auto mb-2" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#eef2ff"/><stop offset="1" stop-color="#f0fdf4"/></linearGradient>
+          </defs>
+          <g transform="translate(0,0)">
+            <ellipse cx="180" cy="70" rx="48" ry="48" class="mannequin-silhouette" />
+            <rect x="70" y="120" width="180" height="130" rx="65" class="mannequin-silhouette" />
+            <rect x="68" y="320" width="143" height="230" rx="32" class="mannequin-silhouette" />
+            <ellipse cx="147" cy="600" rx="60" ry="35" class="mannequin-silhouette" />
+          </g>
+        </svg>
+
+        <!-- Parts (absolute positioned inside canvas) -->
+        <img id="img-head" class="part-img absolute" alt="head part" hidden>
+        <img id="img-upper" class="part-img absolute" alt="upper part" hidden>
+        <img id="img-legs" class="part-img absolute" alt="legs part" hidden>
+        <img id="img-feet" class="part-img absolute" alt="feet part" hidden>
+
+        <!-- transparent touch buttons for choosing label -->
+        <button data-part="head" class="choose-btn absolute" style="z-index:10;">👒</button>
+        <button data-part="upper" class="choose-btn absolute" style="z-index:10;">👕</button>
+        <button data-part="legs" class="choose-btn absolute" style="z-index:10;">👖</button>
+        <button data-part="feet" class="choose-btn absolute" style="z-index:10;">👟</button>
+      </div>
+    </section>
   </main>
-  <footer>
-    Spinta atnaujinta 2025-08-11
-  </footer>
-  <!-- Cropper.js -->
+
+  <!-- Crop modal (hidden until used) -->
+  <div id="cropModal" class="modal-backdrop fixed inset-0 hidden items-center justify-center bg-black/60">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 max-w-[92vw] max-h-[86vh] overflow-auto">
+      <div class="flex items-center justify-between mb-3">
+        <div class="font-semibold">Crop image</div>
+        <button id="cropClose" class="px-2 py-1 rounded">✕</button>
+      </div>
+      <div class="max-w-full overflow-auto"><img id="cropImg" src="" alt="crop preview" style="max-width:84vw;max-height:60vh;border-radius:8px;background:#f3f4f6"></div>
+      <div class="mt-3 flex gap-2 justify-end">
+        <button id="cropSave" class="px-3 py-2 rounded bg-emerald-500 text-white">Save</button>
+        <button id="cropCancel" class="px-3 py-2 rounded bg-gray-100 dark:bg-gray-700">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Choose label modal -->
+  <div id="labelModal" class="modal-backdrop fixed inset-0 hidden items-center justify-center bg-black/50">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 w-full max-w-sm">
+      <div class="font-semibold mb-2">Choose label</div>
+      <input id="labelInput" class="w-full p-2 rounded border" placeholder="e.g. T-shirt">
+      <div class="mt-3 flex gap-2 justify-end">
+        <button id="labelSave" class="px-3 py-2 rounded bg-emerald-500 text-white">Save</button>
+        <button id="labelClear" class="px-3 py-2 rounded bg-gray-100 dark:bg-gray-700">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center text-xs p-3 text-gray-500">Spinta atnaujinta 2025-08-11</footer>
+
+  <!-- Scripts: Cropper, logic -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <script>
-    // SVG part dimensions (width/height) for cropping
+    // ========== State & PARTS ===========
     const PARTS = {
-      head:  { width: 80, height: 80, aspect: 1,   shape: "ellipse", left: 140 },
-      upper: { width: 180, height: 130, aspect: 180/130, shape: "rect", left: 48 },
-      legs:  { width: 143, height: 230, aspect: 143/230, shape: "rect", left: 68 },
-      feet:  { width: 120, height: 70,  aspect: 120/70,  shape: "ellipse", left: 87 }
+      head: { w:80,h:80, left:140, shape:'circle' },
+      upper:{ w:180,h:130, left:48, shape:'round' },
+      legs:{ w:143,h:230,left:68, shape:'round' },
+      feet:{ w:120,h:70,left:87, shape:'circle' }
     };
 
-    let outfit = { head: null, upper: null, legs: null, feet: null };
-    let outfitPhotos = { head: null, upper: null, legs: null, feet: null };
+    let outfit = { head:null, upper:null, legs:null, feet:null };
+    let outfitPhotos = { head:null, upper:null, legs:null, feet:null }; // id refs to IDB
     let presets = [];
 
-    // --- Cropper.js logic ---
-    let currentCropPart = null;
-    let cropper = null;
-
-    function triggerFile(part) {
-      document.getElementById('file-' + part).click();
-    }
-
-    function handlePhoto(part) {
-      const input = document.getElementById('file-' + part);
-      const file = input.files && input.files[0];
-      if (!file) return;
-      if (!file.type.startsWith('image/')) {
-        alert('Please upload an image file!');
-        return;
-      }
-      if (file.size > 7 * 1024 * 1024) {
-        alert('Image too large! Max size: 7MB');
-        return;
-      }
-      currentCropPart = part;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        showCropModal(e.target.result, part);
-      }
-      reader.readAsDataURL(file);
-    }
-
-    function showCropModal(dataURL, part) {
-      const cropModal = document.getElementById('cropModal');
-      const cropImg = document.getElementById('cropImg');
-      cropImg.src = dataURL;
-      cropModal.style.display = 'flex';
-
-      setTimeout(() => { // Cropper needs image to be visible
-        if (cropper) cropper.destroy();
-        cropper = new Cropper(cropImg, {
-          aspectRatio: PARTS[part].aspect,
-          viewMode: 1,
-          movable: true,
-          zoomable: true,
-          scalable: true,
-          rotatable: false,
-          dragMode: 'move',
-          responsive: true,
-          autoCropArea: 1
-        });
-      }, 100);
-
-      document.getElementById('cropSaveBtn').onclick = () => saveCrop(part);
-    }
-
-    function closeCropModal() {
-      document.getElementById('cropModal').style.display = 'none';
-      if (cropper) cropper.destroy();
-      cropper = null;
-      currentCropPart = null;
-    }
-
-    function saveCrop(part) {
-      const dims = PARTS[part];
-      if (!cropper) return;
-      // Get cropped image, at SVG part's display size
-      const croppedDataURL = cropper.getCroppedCanvas({
-        width: dims.width,
-        height: dims.height
-      }).toDataURL('image/png');
-      outfitPhotos[part] = croppedDataURL;
-      closeCropModal();
-      displayPhotos();
-    }
-
-    // --- Stack body parts vertically so they touch ---
-    function displayPhotos() {
-      // Order matters for stacking
-      const order = ['head','upper','legs','feet'];
-      let top = 32;
-      const overlap = 14; // px overlap for 'seam'
-      function placeNext(i, currTop) {
-        if (i >= order.length) return;
-        const part = order[i];
-        const img = document.getElementById('img-' + part);
-        const dims = PARTS[part];
-        if (outfitPhotos[part]) {
-          img.src = outfitPhotos[part];
-          img.hidden = false;
-          img.style.position = "absolute";
-          img.style.left = dims.left + 'px';
-          img.style.width = dims.width + 'px';
-          img.style.height = dims.height + 'px';
-          img.style.borderRadius = (dims.shape === "ellipse" ? "50%" : "16px");
-          img.style.clipPath = (dims.shape === "ellipse"
-            ? `ellipse(50% 50% at 50% 50%)`
-            : "none");
-          img.onload = function() {
-            img.style.top = currTop + 'px';
-            placeNext(i+1, currTop + img.height - overlap);
-          };
-          // If already loaded (cache):
-          if (img.complete && img.naturalHeight) {
-            img.style.top = currTop + 'px';
-            placeNext(i+1, currTop + img.height - overlap);
-          }
-        } else {
-          img.hidden = true;
-          placeNext(i+1, currTop); // skip this one
-        }
-      }
-      placeNext(0, top);
-    }
-
-    // --- Presets, outfit, etc ---
-    function loadPresets() {
-      try {
-        const data = localStorage.getItem('presets');
-        if (data) {
-          presets = JSON.parse(data);
-        }
-      } catch (e) {
-        presets = [];
-      }
-    }
-    function persistPresets() {
-      localStorage.setItem('presets', JSON.stringify(presets));
-    }
-    const partOptions = {
-      head: ['Cap', 'Hat', 'Bandana', 'Nothing'],
-      upper: ['T-shirt', 'Jacket', 'Dress', 'Sweater', 'Shirt'],
-      legs: ['Jeans', 'Skirt', 'Shorts', 'Trousers'],
-      feet: ['Sneakers', 'Boots', 'Sandals', 'Dress shoes']
+    const fileEls = {
+      head: document.getElementById('file-head'),
+      upper: document.getElementById('file-upper'),
+      legs: document.getElementById('file-legs'),
+      feet: document.getElementById('file-feet')
     };
-    function choosePart(part) {
-      let options = partOptions[part] || [];
-      let msg = `Choose for ${part}:\n`;
-      options.forEach((opt, idx) => { msg += `${idx + 1}. ${opt}\n`; });
-      let choice = prompt(msg, outfit[part] || "");
-      if (!choice) return;
-      let idx = Number(choice) - 1;
-      if (!isNaN(idx) && idx >= 0 && idx < options.length) {
-        outfit[part] = options[idx];
-      } else if (options.includes(choice)) {
-        outfit[part] = choice;
-      } else {
-        alert("Not a valid option.");
-        return;
+    const imgEls = {
+      head: document.getElementById('img-head'),
+      upper: document.getElementById('img-upper'),
+      legs: document.getElementById('img-legs'),
+      feet: document.getElementById('img-feet')
+    };
+
+    // simple IDB wrapper
+    const IDB = (()=>{
+      const DB='ps-db', STORE='images'; let dbp=null;
+      function open(){ if(dbp) return dbp; dbp=new Promise((res,rej)=>{ const r=indexedDB.open(DB,1); r.onupgradeneeded=()=>r.result.createObjectStore(STORE,{keyPath:'id',autoIncrement:true}); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); return dbp; }
+      async function add(blob){ const db=await open(); return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readwrite'); const store=tx.objectStore(STORE); const req=store.add({blob}); req.onsuccess=()=>res(req.result); req.onerror=()=>rej(req.error); }); }
+      async function get(id){ if(!id) return null; const db=await open(); return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readonly'); const store=tx.objectStore(STORE); const req=store.get(id); req.onsuccess=()=>res(req.result?req.result.blob:null); req.onerror=()=>rej(req.error); }); }
+      async function del(id){ const db=await open(); return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readwrite'); const store=tx.objectStore(STORE); const req=store.delete(id); req.onsuccess=()=>res(); req.onerror=()=>rej(req.error); }); }
+      return { add, get, del };
+    })();
+
+    // ========== Cropper modal ===========
+    let cropper=null, currentPart=null;
+    const cropModal = document.getElementById('cropModal');
+    const cropImg = document.getElementById('cropImg');
+    const cropSave = document.getElementById('cropSave');
+    const cropCancel = document.getElementById('cropCancel');
+    const cropClose = document.getElementById('cropClose');
+
+    function openCrop(dataURL, part){
+      currentPart = part;
+      cropImg.src = dataURL;
+      cropModal.classList.remove('hidden');
+      cropModal.classList.add('flex');
+      setTimeout(()=>{
+        if(cropper) cropper.destroy();
+        cropper = new Cropper(cropImg, { aspectRatio: PARTS[part].w / PARTS[part].h, viewMode:1, autoCropArea:1, dragMode:'move', responsive:true });
+      },80);
+    }
+    function closeCrop(){ cropModal.classList.remove('flex'); cropModal.classList.add('hidden'); if(cropper){ cropper.destroy(); cropper=null;} currentPart=null; }
+
+    cropCancel.addEventListener('click', closeCrop); cropClose.addEventListener('click', closeCrop);
+
+    cropSave.addEventListener('click', async ()=>{
+      if(!cropper || !currentPart) return;
+      const dims = PARTS[currentPart];
+      const canvas = cropper.getCroppedCanvas({ width: dims.w*2, height: dims.h*2 });
+      canvas.toBlob(async (blob)=>{
+        const id = await IDB.add(blob);
+        outfitPhotos[currentPart] = id; persistState(); await renderPhotos(); closeCrop();
+      }, 'image/png', 0.92);
+    });
+
+    // ========== File inputs ===========
+    Object.entries(fileEls).forEach(([part,el])=>{
+      el.addEventListener('change', ()=>{ const f = el.files && el.files[0]; if(!f) return; if(!f.type.startsWith('image/')){ alert('Choose an image'); return; } if(f.size > 7*1024*1024){ alert('Max size 7MB'); return; } const r = new FileReader(); r.onload=()=> openCrop(r.result, part); r.readAsDataURL(f); });
+    });
+
+    // ========== render photos and stack them ==========
+    async function renderPhotos(){
+      // First, get all blobs and dimensions
+      let images = {};
+      for(const part of Object.keys(PARTS)){
+        const id = outfitPhotos[part]; const img = imgEls[part];
+        if(id){
+          const blob = await IDB.get(id); 
+          if(blob){
+            const url = URL.createObjectURL(blob);
+            images[part] = { url, img, meta: PARTS[part] };
+            img.src=url; img.hidden=false;
+            img.onload=()=>{ URL.revokeObjectURL(url); placeStackedParts(); };
+          } else { img.hidden=true; }
+        } else { img.hidden=true; }
       }
-      displayOutfit();
+      // After all images, call placement
+      placeStackedParts();
+      renderLabels();
     }
-    function randomizeOutfit() {
-      for (let part in outfit) {
-        const options = partOptions[part];
-        outfit[part] = options[Math.floor(Math.random() * options.length)];
-      }
-      displayOutfit();
-    }
-    function savePreset() {
-      const name = prompt('Enter a name for this outfit preset:');
-      if (name) {
-        presets.push({ name, outfit: { ...outfit }, photos: { ...outfitPhotos } });
-        persistPresets();
-        updatePresetList();
-      }
-    }
-    function updatePresetList() {
-      const ul = document.getElementById('presetList');
-      ul.innerHTML = '';
-      presets.forEach((preset, idx) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${preset.name}</span>
-          <button class="preset-action-btn" aria-label="Load preset ${preset.name}" title="Load preset" onclick="loadPreset(${idx})">⏎</button>
-          <button class="preset-action-btn" aria-label="Delete preset ${preset.name}" title="Delete preset" onclick="deletePreset(${idx})">🗑</button>
-        `;
-        ul.appendChild(li);
-      });
-    }
-    function loadPreset(idx) {
-      if (presets[idx]) {
-        outfit = { ...presets[idx].outfit };
-        outfitPhotos = { ...presets[idx].photos };
-        displayOutfit();
-        displayPhotos();
-      }
-    }
-    function deletePreset(idx) {
-      if (confirm(`Delete preset "${presets[idx].name}"?`)) {
-        presets.splice(idx, 1);
-        persistPresets();
-        updatePresetList();
-      }
-    }
-    function displayOutfit() {
-      document.querySelectorAll('.outfit-label').forEach(el => el.remove());
-      const container = document.querySelector('.human-container');
-      const labelMap = {
-        head: { class: 'label-head', val: outfit.head },
-        upper: { class: 'label-upper', val: outfit.upper },
-        legs: { class: 'label-legs', val: outfit.legs },
-        feet: { class: 'label-feet', val: outfit.feet }
-      };
-      Object.entries(labelMap).forEach(([part, {class: cls, val}]) => {
-        if (val) {
-          const span = document.createElement('span');
-          span.className = `outfit-label ${cls}`;
-          span.textContent = val;
-          container.appendChild(span);
+
+    // Stack placement: each part connects to the previous
+    function placeStackedParts(){
+      const canvasEl = document.getElementById('canvas');
+      const bw = canvasEl.clientWidth;
+      const scale = bw / 320;
+      const order = ['head','upper','legs','feet'];
+      const overlap = { head: 10, upper: 16, legs: 24 }; // px to overlap for each connection
+      let top = 32*scale;
+      let prev = null;
+      for(const part of order){
+        const img = imgEls[part];
+        const meta = PARTS[part];
+        const w = meta.w * scale;
+        const h = meta.h * scale;
+        const left = meta.left * scale;
+        if(img && !img.hidden){
+          img.style.width = w+'px'; img.style.height = h+'px';
+          img.style.left = left+'px';
+          img.style.borderRadius = meta.shape==='circle'? '9999px': '12px';
+          if(prev){
+            // connect: snap top to previous bottom - overlap
+            img.style.top = (top - overlap[prev] || 0)+'px';
+            top = (parseFloat(img.style.top) + h);
+          }else{
+            img.style.top = top+'px';
+            top = top + h;
+          }
+          prev = part;
         }
-      });
+      }
+      // Place choose buttons where parts are
+      for(const [part,meta] of Object.entries(PARTS)){
+        const btn = document.querySelector(`button.choose-btn[data-part="${part}"]`);
+        const img = imgEls[part];
+        if(btn && img && !img.hidden){
+          const bwid = Math.max(36, Math.min(80, img.width*0.28));
+          const bht = Math.max(28, Math.min(48, img.height*0.18));
+          btn.style.left = (parseFloat(img.style.left) + (img.width-bwid)/2) + 'px';
+          btn.style.top = (parseFloat(img.style.top) + (img.height-bht)/2) + 'px';
+          btn.style.width = bwid + 'px';
+          btn.style.height = bht + 'px';
+          btn.style.borderRadius = meta.shape==='circle' ? '9999px' : '8px';
+          btn.hidden = false;
+        } else if(btn) {
+          btn.hidden = true;
+        }
+      }
     }
-    // On load
-    loadPresets();
-    updatePresetList();
-    displayOutfit();
-    displayPhotos();
-    window.addEventListener('beforeunload', () => {
-      localStorage.setItem('currentOutfit', JSON.stringify(outfit));
-      localStorage.setItem('currentPhotos', JSON.stringify(outfitPhotos));
+
+    window.addEventListener('resize', ()=>{ placeStackedParts(); });
+
+    // ========== label modal ===========
+    const labelModal = document.getElementById('labelModal');
+    const labelInput = document.getElementById('labelInput');
+    const labelSave = document.getElementById('labelSave');
+    const labelClear = document.getElementById('labelClear');
+    let labelFor = null;
+
+    document.querySelectorAll('.choose-btn').forEach(b=> b.addEventListener('click', (e)=>{ labelFor = e.currentTarget.dataset.part; labelModal.classList.remove('hidden'); labelModal.classList.add('flex'); labelInput.value = outfit[labelFor] || ''; setTimeout(()=>labelInput.focus(),60); }));
+
+    labelSave.addEventListener('click', ()=>{ if(!labelFor) return; const v = labelInput.value.trim(); outfit[labelFor] = v || null; persistState(); renderLabels(); labelModal.classList.remove('flex'); labelModal.classList.add('hidden'); });
+    labelClear.addEventListener('click', ()=>{ if(!labelFor) return; outfit[labelFor] = null; persistState(); renderLabels(); labelModal.classList.remove('flex'); labelModal.classList.add('hidden'); });
+
+    function renderLabels(){ document.querySelectorAll('.js-label').forEach(n=>n.remove()); const canvasEl = document.getElementById('canvas'); const scale = canvasEl.clientWidth / 320; let top = 0; for(const [part,val] of Object.entries(outfit)){ if(!val) continue; const img = imgEls[part]; if(img && !img.hidden){ const span = document.createElement('div'); span.className='js-label absolute px-3 py-1 rounded-full bg-white/90 dark:bg-gray-800/80 text-sm font-semibold shadow-md'; span.textContent = val; canvasEl.appendChild(span); const imgRect = img.getBoundingClientRect(); const canvasRect = canvasEl.getBoundingClientRect(); const topPos = img.offsetTop + img.height + 4; span.style.top = topPos+'px'; span.style.left = (img.offsetLeft + img.width/2 - span.offsetWidth/2) + 'px'; } }
+    }
+
+    // ========== preset handling ===========
+    const presetList = document.getElementById('presetList');
+    document.getElementById('savePreset').addEventListener('click', saveCurrentPreset);
+    document.getElementById('randomBtn').addEventListener('click', ()=>{ for(const p of Object.keys(outfit)){ const opts = {head:['Cap','Hat','Bandana','None'], upper:['T-shirt','Jacket','Dress','Sweater','Shirt'], legs:['Jeans','Skirt','Shorts','Trousers'], feet:['Sneakers','Boots','Sandals','Dress shoes'] }[p]; outfit[p] = opts[Math.floor(Math.random()*opts.length)]; } persistState(); renderLabels(); });
+
+    async function saveCurrentPreset(){ const name = prompt('Preset name'); if(!name) return; // build thumbnail
+      const cw=160,ch=360; const c=document.createElement('canvas'); c.width=cw; c.height=ch; const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cw,ch); for(const part of ['head','upper','legs','feet']){ const id = outfitPhotos[part]; if(!id) continue; const blob = await IDB.get(id); if(!blob) continue; const img = await blobToImage(blob); const ref = PARTS[part]; const scale = cw/320; ctx.drawImage(img, ref.left*scale, ref.top*scale, ref.w*scale, ref.h*scale); }
+      const thumb = c.toDataURL('image/png'); const entry = { name, outfit:{...outfit}, photos:{...outfitPhotos}, thumb, created: Date.now() }; presets.unshift(entry); persistPresets(); alert('Saved'); }
+
+    function renderPresets(){ presetList.innerHTML=''; presets.forEach((p,idx)=>{ const li=document.createElement('li'); li.className='flex items-center gap-2 p-2 rounded-md bg-gray-50 dark:bg-gray-700'; li.innerHTML = `<div class="w-12 h-28 overflow-hidden rounded-md"><img src="${p.thumb}" class="w-full h-full object-cover"/></div><div class="flex-1 text-sm">${p.name}</div>`; const btns = document.createElement('div'); btns.className='flex gap-1'; const load=document.createElement('button'); load.textContent='Load'; load.className='px-2 py-1 rounded bg-emerald-500 text-white text-sm'; load.addEventListener('click', ()=>{ outfit = {...p.outfit}; outfitPhotos = {...p.photos}; persistState(); renderLabels(); renderPhotos(); }); const del=document.createElement('button'); del.textContent='Del'; del.className='px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-sm'; del.addEventListener('click', ()=>{ if(confirm('Delete preset?')){ presets.splice(idx,1); persistPresets(); }}); btns.append(load,del); li.appendChild(btns); presetList.appendChild(li); }); }
+
+    function persistPresets(){ localStorage.setItem('ps_presets', JSON.stringify(presets)); renderPresets(); }
+    function loadPresets(){ try{ presets = JSON.parse(localStorage.getItem('ps_presets')||'[]'); }catch(e){ presets=[] } renderPresets(); }
+
+    function persistState(){ localStorage.setItem('ps_outfit', JSON.stringify(outfit)); localStorage.setItem('ps_photos', JSON.stringify(outfitPhotos)); }
+    async function loadState(){ try{ outfit = JSON.parse(localStorage.getItem('ps_outfit')) || outfit; outfitPhotos = JSON.parse(localStorage.getItem('ps_photos')) || outfitPhotos; }catch(e){} await renderPhotos(); renderLabels(); }
+
+    function blobToImage(blob){ return new Promise(res=>{ const url = URL.createObjectURL(blob); const img = new Image(); img.onload = ()=>{ URL.revokeObjectURL(url); res(img); }; img.src = url; }); }
+
+    // ========== export/import (basic) ==========
+    document.getElementById('exportBtn').addEventListener('click', async ()=>{
+      const payload = { outfit, presets, photos: {} };
+      for(const p of Object.values(outfitPhotos)){ if(!p) continue; const b = await IDB.get(p); payload.photos[p] = await blobToBase64(b); }
+      const blob = new Blob([JSON.stringify(payload)], {type:'application/json'});
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download='paulinos-spinta-export.json'; document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
     });
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem('currentOutfit');
-      const savedPhotos = localStorage.getItem('currentPhotos');
-      if (saved) {
-        try {
-          outfit = JSON.parse(saved);
-          displayOutfit();
-        } catch(e){}
-      }
-      if (savedPhotos) {
-        try {
-          outfitPhotos = JSON.parse(savedPhotos);
-          displayPhotos();
-        } catch(e){}
-      }
-    });
+    function blobToBase64(blob){ return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(blob); }); }
+
+    // ========== init ==========
+    loadPresets(); loadState();
+    setTimeout(()=>{ placeStackedParts(); renderPhotos(); },200);
+
+    // dark toggle and preferences
+    const darkToggle = document.getElementById('darkToggle'); const darkPref = document.getElementById('darkPref');
+    function applyPref(){ const p = localStorage.getItem('theme') || 'dark'; if(p==='dark'){ document.documentElement.classList.add('dark'); darkPref.checked=true } else { document.documentElement.classList.remove('dark'); darkPref.checked=false; } }
+    darkToggle.addEventListener('click', ()=>{ const now = document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', now ? 'dark' : 'light'); applyPref(); }); darkPref.addEventListener('change', ()=>{ localStorage.setItem('theme', darkPref.checked ? 'dark' : 'light'); applyPref(); }); applyPref();
+
+    // show/hide mannequin
+    document.getElementById('showContours').addEventListener('change', (e)=> document.getElementById('mannequinSVG').style.opacity = e.target.checked ? '1' : '0.08');
   </script>
 </body>
 </html>
