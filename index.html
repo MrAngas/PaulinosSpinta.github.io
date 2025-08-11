@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Paulinos spinta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --pastel-green: #d7fbe8;
+      --outline: #3d6652;
+      --highlight: #b2e5c8;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: var(--pastel-green);
+      display: flex;
+      flex-direction: column;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #29443a;
+    }
+    header {
+      text-align: center;
+      padding: 32px 0 12px 0;
+      font-size: 2.5rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      background: transparent;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      gap: 40px;
+      min-height: 400px;
+    }
+    .human-container {
+      position: relative;
+      width: 260px;
+      height: 500px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    /* Overlay buttons on SVG */
+    .part-btn {
+      position: absolute;
+      background: rgba(220, 255, 241, 0.01);
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      z-index: 2;
+    }
+    .part-btn:hover {
+      background: rgba(104, 194, 141, 0.13);
+    }
+    /* Positioning each part */
+    .btn-head { left: 90px; top: 20px; width: 80px; height: 80px; border-radius: 50%; }
+    .btn-upper { left: 70px; top: 90px; width: 120px; height: 110px; border-radius: 50px; }
+    .btn-legs { left: 100px; top: 200px; width: 60px; height: 180px; border-radius: 30px; }
+    .btn-feet { left: 100px; top: 380px; width: 60px; height: 70px; border-radius: 20px; }
+
+    /* Sidebar for controls */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: rgba(255,255,255,0.45);
+      border-radius: 18px;
+      padding: 24px 18px;
+      min-width: 210px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      align-self: flex-start;
+    }
+    .sidebar button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      background: var(--highlight);
+      color: #29443a;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.18s;
+      margin-bottom: 2px;
+    }
+    .sidebar button:hover {
+      background: #b2e7c9;
+    }
+    .preset-list {
+      margin-top: 7px;
+      list-style: none;
+      padding: 0;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    .preset-list li {
+      background: #e8fff3;
+      margin-bottom: 4px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.98rem;
+    }
+    .preset-list li:hover {
+      background: #c5ecd7;
+    }
+    footer {
+      text-align: center;
+      font-size: 1.05rem;
+      margin: 0;
+      padding: 20px;
+      background: transparent;
+      color: #29443a;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    Paulinos spinta
+  </header>
+  <main>
+    <div class="human-container">
+      <svg width="260" height="500" viewBox="0 0 260 500" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 0; top: 0;">
+        <!-- Head -->
+        <ellipse cx="130" cy="60" rx="38" ry="38" stroke="var(--outline)" stroke-width="5" fill="none"/>
+        <!-- Upper body -->
+        <rect x="80" y="98" width="100" height="120" rx="45" stroke="var(--outline)" stroke-width="5" fill="none"/>
+        <!-- Legs -->
+        <rect x="110" y="218" width="40" height="180" rx="19" stroke="var(--outline)" stroke-width="5" fill="none"/>
+        <!-- Feet -->
+        <ellipse cx="130" cy="445" rx="34" ry="25" stroke="var(--outline)" stroke-width="5" fill="none"/>
+      </svg>
+      <!-- Transparent buttons for each body part -->
+      <button class="part-btn btn-head" title="Choose hat or headwear" onclick="choosePart('head')"></button>
+      <button class="part-btn btn-upper" title="Choose shirt or dress" onclick="choosePart('upper')"></button>
+      <button class="part-btn btn-legs" title="Choose pants or skirt" onclick="choosePart('legs')"></button>
+      <button class="part-btn btn-feet" title="Choose shoes" onclick="choosePart('feet')"></button>
+    </div>
+    <div class="sidebar">
+      <button onclick="randomizeOutfit()">🎲 Randomize</button>
+      <button onclick="savePreset()">💾 Save Preset</button>
+      <label style="margin-bottom:0.3em;">Preset Library:</label>
+      <ul class="preset-list" id="presetList"></ul>
+    </div>
+  </main>
+  <footer>
+    Spinta atnaujinta 2025-08-11
+  </footer>
+  <script>
+    // Placeholder JS for interactivity
+
+    // Demo structure for outfit state
+    let outfit = { head: null, upper: null, legs: null, feet: null };
+    let presets = [];
+
+    function choosePart(part) {
+      alert(`Upload or select an image for the "${part}" part. (Not implemented here)`);
+      // Here, open a file dialog or modal to upload/select images for the part.
+    }
+
+    function randomizeOutfit() {
+      // For demo, just assign random names
+      const sample = {
+        head: ['Cap', 'Hat', 'Nothing'],
+        upper: ['T-shirt', 'Jacket', 'Dress', 'Sweater'],
+        legs: ['Jeans', 'Skirt', 'Shorts'],
+        feet: ['Sneakers', 'Boots', 'Sandals']
+      };
+      for (let part in outfit) {
+        const options = sample[part];
+        outfit[part] = options[Math.floor(Math.random() * options.length)];
+      }
+      alert('Randomized outfit: ' + JSON.stringify(outfit));
+    }
+
+    function savePreset() {
+      const name = prompt('Enter a name for this outfit preset:');
+      if (name) {
+        presets.push({ name, outfit: { ...outfit } });
+        updatePresetList();
+      }
+    }
+
+    function updatePresetList() {
+      const ul = document.getElementById('presetList');
+      ul.innerHTML = '';
+      presets.forEach((preset, idx) => {
+        const li = document.createElement('li');
+        li.textContent = preset.name;
+        li.onclick = () => {
+          outfit = { ...preset.outfit };
+          alert('Loaded preset: ' + preset.name + '\n' + JSON.stringify(outfit));
+        };
+        ul.appendChild(li);
+      });
+    }
+    // Could add localStorage support here for persistence
+  </script>
+</body>
+</html>
