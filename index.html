@@ -32,9 +32,9 @@
       flex: 1;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: stretch;
       position: relative;
-      gap: 40px;
+      gap: 32px;
       min-height: 400px;
     }
     .human-container {
@@ -44,16 +44,24 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      background: none;
+      margin: 0 auto;
     }
     /* Overlay buttons on SVG */
     .part-btn {
       position: absolute;
-      background: rgba(220, 255, 241, 0.28); /* More visible, but still transparent */
+      background: rgba(220, 255, 241, 0.28);
       border: 2px dashed #6fdca2;
       cursor: pointer;
       transition: background 0.2s, border-color 0.2s;
       z-index: 2;
       outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4em;
+      color: #3d6652;
+      opacity: 0.8;
     }
     .part-btn:focus {
       border-color: #3d6652;
@@ -63,11 +71,38 @@
       background: rgba(104, 194, 141, 0.13);
       border-color: #3d6652;
     }
-    /* Positioning each part */
     .btn-head { left: 90px; top: 20px; width: 80px; height: 80px; border-radius: 50%; }
     .btn-upper { left: 70px; top: 90px; width: 120px; height: 110px; border-radius: 50px; }
     .btn-legs { left: 100px; top: 200px; width: 60px; height: 180px; border-radius: 30px; }
     .btn-feet { left: 100px; top: 380px; width: 60px; height: 70px; border-radius: 20px; }
+
+    /* Masked images for each part */
+    .part-img {
+      position: absolute;
+      object-fit: cover;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .img-head {
+      left: 90px; top: 20px; width: 80px; height: 80px;
+      border-radius: 50%;
+      clip-path: ellipse(40px 40px at 40px 40px);
+    }
+    .img-upper {
+      left: 70px; top: 90px; width: 120px; height: 110px;
+      border-radius: 50px;
+      clip-path: inset(0 round 50px);
+    }
+    .img-legs {
+      left: 100px; top: 200px; width: 60px; height: 180px;
+      border-radius: 30px;
+      clip-path: inset(0 round 30px);
+    }
+    .img-feet {
+      left: 100px; top: 380px; width: 60px; height: 70px;
+      border-radius: 20px;
+      clip-path: ellipse(30px 35px at 30px 35px);
+    }
 
     /* Outfit labels */
     .outfit-label {
@@ -103,6 +138,8 @@
       min-width: 210px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.05);
       align-self: flex-start;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .sidebar button {
       padding: 10px 14px;
@@ -137,6 +174,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 4px;
     }
     .preset-list li:hover {
       background: #c5ecd7;
@@ -156,6 +194,36 @@
       color: #ce3b3b;
       background: #fbe8e8;
     }
+
+    /* Upload buttons */
+    .upload-btn {
+      position: absolute;
+      z-index: 10;
+      background: rgba(240,255,240,0.8);
+      border: 1px solid #b2e5c8;
+      border-radius: 8px;
+      font-size: 1.1em;
+      padding: 2px 7px;
+      color: #29443a;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.85;
+      cursor: pointer;
+      transition: background 0.15s;
+      min-width: 34px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(60,60,60,0.04);
+    }
+    .upload-btn:hover, .upload-btn:focus {
+      background: #b2e7c9;
+      outline: 2px solid #3d6652;
+    }
+    .upload-head { top: 8px; }
+    .upload-upper { top: 88px;}
+    .upload-legs { top: 184px;}
+    .upload-feet { top: 360px;}
+    input[type="file"] { display: none; }
+
     footer {
       text-align: center;
       font-size: 1.05rem;
@@ -163,6 +231,55 @@
       padding: 20px;
       background: transparent;
       color: #29443a;
+    }
+
+    /* --- MOBILE --- */
+    @media (max-width: 700px) {
+      main {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        min-height: unset;
+      }
+      .sidebar {
+        min-width: unset;
+        width: 100%;
+        max-width: 100vw;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-self: stretch;
+        padding: 16px 4vw;
+        justify-content: space-between;
+      }
+      .human-container {
+        width: 95vw;
+        max-width: 330px;
+        height: 60vw;
+        max-height: 70vw;
+        min-height: 320px;
+      }
+      svg {
+        width: 100% !important;
+        height: auto !important;
+      }
+      .outfit-label,
+      .img-head,
+      .img-upper,
+      .img-legs,
+      .img-feet,
+      .btn-head,
+      .btn-upper,
+      .btn-legs,
+      .btn-feet,
+      .upload-btn {
+        /* scale down for mobile */
+        transform: scale(0.8) translateX(-62.5%);
+        left: 62.5%;
+      }
+      .preset-list {
+        max-height: 60px;
+      }
     }
   </style>
 </head>
@@ -182,12 +299,25 @@
         <!-- Feet -->
         <ellipse cx="130" cy="445" rx="34" ry="25" stroke="var(--outline)" stroke-width="5" fill="none"/>
       </svg>
+      <!-- Image overlays for parts -->
+      <img id="img-head"    class="part-img img-head"    alt="Head"    hidden>
+      <img id="img-upper"   class="part-img img-upper"   alt="Upper"   hidden>
+      <img id="img-legs"    class="part-img img-legs"    alt="Legs"    hidden>
+      <img id="img-feet"    class="part-img img-feet"    alt="Feet"    hidden>
+      <!-- Upload buttons for each part and hidden file inputs -->
+      <button class="upload-btn upload-head" onclick="triggerFile('head')" title="Upload photo for head">📷</button>
+      <input type="file" accept="image/*" id="file-head" onchange="handlePhoto('head')">
+      <button class="upload-btn upload-upper" onclick="triggerFile('upper')" title="Upload photo for upper body">📷</button>
+      <input type="file" accept="image/*" id="file-upper" onchange="handlePhoto('upper')">
+      <button class="upload-btn upload-legs" onclick="triggerFile('legs')" title="Upload photo for legs">📷</button>
+      <input type="file" accept="image/*" id="file-legs" onchange="handlePhoto('legs')">
+      <button class="upload-btn upload-feet" onclick="triggerFile('feet')" title="Upload photo for feet">📷</button>
+      <input type="file" accept="image/*" id="file-feet" onchange="handlePhoto('feet')">
       <!-- Transparent, but visible, buttons for each body part -->
-      <button class="part-btn btn-head" aria-label="Choose hat or headwear" title="Choose hat or headwear" onclick="choosePart('head')"></button>
-      <button class="part-btn btn-upper" aria-label="Choose shirt or dress" title="Choose shirt or dress" onclick="choosePart('upper')"></button>
-      <button class="part-btn btn-legs" aria-label="Choose pants or skirt" title="Choose pants or skirt" onclick="choosePart('legs')"></button>
-      <button class="part-btn btn-feet" aria-label="Choose shoes" title="Choose shoes" onclick="choosePart('feet')"></button>
-      <!-- Outfit labels will be injected here -->
+      <button class="part-btn btn-head" aria-label="Choose hat or headwear" title="Choose hat or headwear" onclick="choosePart('head')">👒</button>
+      <button class="part-btn btn-upper" aria-label="Choose shirt or dress" title="Choose shirt or dress" onclick="choosePart('upper')">👕</button>
+      <button class="part-btn btn-legs" aria-label="Choose pants or skirt" title="Choose pants or skirt" onclick="choosePart('legs')">👖</button>
+      <button class="part-btn btn-feet" aria-label="Choose shoes" title="Choose shoes" onclick="choosePart('feet')">👟</button>
     </div>
     <div class="sidebar">
       <button onclick="randomizeOutfit()" aria-label="Randomize outfit">🎲 Randomize</button>
@@ -202,6 +332,7 @@
   <script>
     // --- Outfit logic and persistence ---
     let outfit = { head: null, upper: null, legs: null, feet: null };
+    let outfitPhotos = { head: null, upper: null, legs: null, feet: null };
 
     let presets = [];
     // Load presets from localStorage
@@ -231,12 +362,10 @@
     // --- UI Logic ---
 
     function choosePart(part) {
-      // Show a prompt with options, fallback to prompt if not supported
       let options = partOptions[part] || [];
       let msg = `Choose for ${part}:\n`;
       options.forEach((opt, idx) => { msg += `${idx + 1}. ${opt}\n`; });
       let choice = prompt(msg, outfit[part] || "");
-      // Allow number or name selection
       if (!choice) return;
       let idx = Number(choice) - 1;
       if (!isNaN(idx) && idx >= 0 && idx < options.length) {
@@ -261,7 +390,7 @@
     function savePreset() {
       const name = prompt('Enter a name for this outfit preset:');
       if (name) {
-        presets.push({ name, outfit: { ...outfit } });
+        presets.push({ name, outfit: { ...outfit }, photos: { ...outfitPhotos } });
         persistPresets();
         updatePresetList();
       }
@@ -284,7 +413,9 @@
     function loadPreset(idx) {
       if (presets[idx]) {
         outfit = { ...presets[idx].outfit };
+        outfitPhotos = { ...presets[idx].photos };
         displayOutfit();
+        displayPhotos();
       }
     }
 
@@ -298,7 +429,6 @@
 
     // --- Display outfit labels on figure ---
     function displayOutfit() {
-      // Remove old labels
       document.querySelectorAll('.outfit-label').forEach(el => el.remove());
       const container = document.querySelector('.human-container');
       const labelMap = {
@@ -317,21 +447,84 @@
       });
     }
 
+    // --- PHOTO UPLOAD logic ---
+    function triggerFile(part) {
+      document.getElementById('file-' + part).click();
+    }
+
+    function handlePhoto(part) {
+      const input = document.getElementById('file-' + part);
+      const file = input.files && input.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file!');
+        return;
+      }
+      // Optionally limit file size
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Image too large! Max size: 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        outfitPhotos[part] = e.target.result; // Data URL
+        displayPhotos();
+
+        // --- GITHUB REPO UPLOAD INTEGRATION ---
+        // To upload to your repo, you must POST this image (e.target.result) to your backend,
+        // which will then use GitHub API to PUT/POST the file in your desired path.
+        // For security, never expose a GitHub token in the browser!
+        // For demo, this only saves locally.
+        // Example: await uploadPhotoToGitHub(part, file);
+      }
+      reader.readAsDataURL(file);
+    }
+
+    function displayPhotos() {
+      ['head','upper','legs','feet'].forEach(part => {
+        const img = document.getElementById('img-' + part);
+        if (outfitPhotos[part]) {
+          img.src = outfitPhotos[part];
+          img.hidden = false;
+        } else {
+          img.hidden = true;
+        }
+      });
+    }
+
+    // Placeholder for GitHub photo upload
+    async function uploadPhotoToGitHub(part, file) {
+      // Not implemented: you need a backend or GitHub Action for this!
+      // 1. Send 'file' to your backend (e.g. POST via fetch)
+      // 2. Backend authenticates and uploads to your repo: e.g. /wardrobe-images/{part}-{Date.now()}.jpg
+      // 3. Backend returns the image URL or path in the repo.
+      // 4. You can store this URL instead of the DataURL in outfitPhotos[part]
+    }
+
     // --- Initial load ---
     loadPresets();
     updatePresetList();
     displayOutfit();
+    displayPhotos();
 
-    // Optional: save current outfit in localStorage for session persistence
+    // Save current outfit and images in localStorage for session persistence
     window.addEventListener('beforeunload', () => {
       localStorage.setItem('currentOutfit', JSON.stringify(outfit));
+      localStorage.setItem('currentPhotos', JSON.stringify(outfitPhotos));
     });
     window.addEventListener('DOMContentLoaded', () => {
       const saved = localStorage.getItem('currentOutfit');
+      const savedPhotos = localStorage.getItem('currentPhotos');
       if (saved) {
         try {
           outfit = JSON.parse(saved);
           displayOutfit();
+        } catch(e){}
+      }
+      if (savedPhotos) {
+        try {
+          outfitPhotos = JSON.parse(savedPhotos);
+          displayPhotos();
         } catch(e){}
       }
     });
