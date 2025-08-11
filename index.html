@@ -11,12 +11,9 @@
       --highlight: #b2e5c8;
     }
     body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       min-height: 100vh;
       background: var(--pastel-green);
-      display: flex;
-      flex-direction: column;
       font-family: 'Segoe UI', Arial, sans-serif;
       color: #29443a;
     }
@@ -32,116 +29,33 @@
       flex: 1;
       display: flex;
       justify-content: center;
-      align-items: stretch;
+      align-items: flex-start;
       position: relative;
       gap: 32px;
       min-height: 400px;
     }
-    .human-container {
-      position: relative;
-      width: 260px;
-      height: 500px;
+    .sidebars-wrap {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      background: none;
-      margin: 0 auto;
+      flex-direction: column;
+      gap: 24px;
+      min-width: 210px;
+      max-width: 240px;
     }
-    /* Overlay buttons on SVG */
-    .part-btn {
-      position: absolute;
-      background: rgba(220, 255, 241, 0.28);
-      border: 2px dashed #6fdca2;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-      z-index: 2;
-      outline: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4em;
-      color: #3d6652;
-      opacity: 0.8;
-    }
-    .part-btn:focus {
-      border-color: #3d6652;
-      background: rgba(104, 194, 141, 0.18);
-    }
-    .part-btn:hover {
-      background: rgba(104, 194, 141, 0.13);
-      border-color: #3d6652;
-    }
-    .btn-head { left: 90px; top: 20px; width: 80px; height: 80px; border-radius: 50%; }
-    .btn-upper { left: 70px; top: 90px; width: 120px; height: 110px; border-radius: 50px; }
-    .btn-legs { left: 100px; top: 200px; width: 60px; height: 180px; border-radius: 30px; }
-    .btn-feet { left: 100px; top: 380px; width: 60px; height: 70px; border-radius: 20px; }
-
-    /* Masked images for each part */
-    .part-img {
-      position: absolute;
-      object-fit: cover;
-      z-index: 1;
-      pointer-events: none;
-    }
-    .img-head {
-      left: 90px; top: 20px; width: 80px; height: 80px;
-      border-radius: 50%;
-      clip-path: ellipse(40px 40px at 40px 40px);
-    }
-    .img-upper {
-      left: 70px; top: 90px; width: 120px; height: 110px;
-      border-radius: 50px;
-      clip-path: inset(0 round 50px);
-    }
-    .img-legs {
-      left: 100px; top: 200px; width: 60px; height: 180px;
-      border-radius: 30px;
-      clip-path: inset(0 round 30px);
-    }
-    .img-feet {
-      left: 100px; top: 380px; width: 60px; height: 70px;
-      border-radius: 20px;
-      clip-path: ellipse(30px 35px at 30px 35px);
-    }
-
-    /* Outfit labels */
-    .outfit-label {
-      pointer-events: none;
-      font-size: 1rem;
-      color: #29443a;
-      box-shadow: 0 1px 4px rgba(60,60,60,0.08);
-      font-weight: bold;
-      background: rgba(255,255,255,0.68);
-      border-radius: 6px;
-      position: absolute;
-      width: 70px;
-      text-align: center;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 5;
-      padding: 2px 0;
-      user-select: none;
-    }
-    .label-head { top: 58px;}
-    .label-upper { top: 155px;}
-    .label-legs { top: 300px;}
-    .label-feet { top: 445px;}
-
-    /* Sidebar for controls */
-    .sidebar {
+    .sidebar,
+    .uploadbar {
       display: flex;
       flex-direction: column;
       gap: 18px;
       background: rgba(255,255,255,0.45);
       border-radius: 18px;
-      padding: 24px 18px;
-      min-width: 210px;
+      padding: 20px 16px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.05);
       align-self: flex-start;
-      max-height: 90vh;
-      overflow-y: auto;
+      width: 100%;
+      max-width: 240px;
     }
-    .sidebar button {
+    .sidebar button,
+    .uploadbar button {
       padding: 10px 14px;
       border: none;
       border-radius: 8px;
@@ -152,8 +66,12 @@
       cursor: pointer;
       transition: background 0.18s;
       margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .sidebar button:hover, .sidebar button:focus {
+    .sidebar button:hover, .sidebar button:focus,
+    .uploadbar button:hover, .uploadbar button:focus {
       background: #b2e7c9;
       outline: 2px solid #3d6652;
     }
@@ -194,35 +112,94 @@
       color: #ce3b3b;
       background: #fbe8e8;
     }
+    .uploadbar label {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    /* Hide file inputs */
+    input[type="file"] { display: none; }
 
-    /* Upload buttons */
-    .upload-btn {
+    .human-container {
+      position: relative;
+      width: 320px;
+      min-height: 700px;
+      margin: 0 auto;
+      background: none;
+    }
+    /* SVG outline for body parts */
+    .body-outline {
       position: absolute;
-      z-index: 10;
-      background: rgba(240,255,240,0.8);
-      border: 1px solid #b2e5c8;
-      border-radius: 8px;
-      font-size: 1.1em;
-      padding: 2px 7px;
+      left: 0; top: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* Show user images at their real, original sizes */
+    .part-img {
+      position: absolute;
+      z-index: 2;
+      box-shadow: 0 2px 16px 2px rgba(0,0,0,0.06);
+      background: #fff;
+      border-radius: 12px;
+      max-width: 90vw;
+      max-height: 90vh;
+    }
+    /* Position the images so their top aligns with the SVG part */
+    #img-head  { left: 140px; top: 32px; }
+    #img-upper { left:  48px; top: 120px; }
+    #img-legs  { left:  68px; top: 320px; }
+    #img-feet  { left:  87px; top: 565px; }
+
+    /* Transparent, visible overlay part buttons for clothing selection */
+    .part-btn {
+      position: absolute;
+      background: rgba(220, 255, 241, 0.28);
+      border: 2px dashed #6fdca2;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      z-index: 3;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4em;
+      color: #3d6652;
+      opacity: 0.88;
+    }
+    .part-btn:focus {
+      border-color: #3d6652;
+      background: rgba(104, 194, 141, 0.18);
+    }
+    .part-btn:hover {
+      background: rgba(104, 194, 141, 0.13);
+      border-color: #3d6652;
+    }
+    .btn-head { left: 140px; top: 32px; width: 80px; height: 80px; border-radius: 50%; }
+    .btn-upper { left: 48px; top: 120px; width: 180px; height: 130px; border-radius: 65px; }
+    .btn-legs { left: 68px; top: 320px; width: 143px; height: 230px; border-radius: 32px; }
+    .btn-feet { left: 87px; top: 565px; width: 120px; height: 70px; border-radius: 35px; }
+
+    /* Outfit labels */
+    .outfit-label {
+      pointer-events: none;
+      font-size: 1rem;
       color: #29443a;
+      box-shadow: 0 1px 4px rgba(60,60,60,0.08);
+      font-weight: bold;
+      background: rgba(255,255,255,0.68);
+      border-radius: 6px;
+      position: absolute;
+      width: 90px;
+      text-align: center;
       left: 50%;
       transform: translateX(-50%);
-      opacity: 0.85;
-      cursor: pointer;
-      transition: background 0.15s;
-      min-width: 34px;
-      text-align: center;
-      box-shadow: 0 2px 6px rgba(60,60,60,0.04);
+      z-index: 6;
+      padding: 2px 0;
+      user-select: none;
     }
-    .upload-btn:hover, .upload-btn:focus {
-      background: #b2e7c9;
-      outline: 2px solid #3d6652;
-    }
-    .upload-head { top: 8px; }
-    .upload-upper { top: 88px;}
-    .upload-legs { top: 184px;}
-    .upload-feet { top: 360px;}
-    input[type="file"] { display: none; }
+    .label-head { top: 90px;}
+    .label-upper { top: 240px;}
+    .label-legs { top: 550px;}
+    .label-feet { top: 635px;}
 
     footer {
       text-align: center;
@@ -232,50 +209,43 @@
       background: transparent;
       color: #29443a;
     }
-
     /* --- MOBILE --- */
-    @media (max-width: 700px) {
+    @media (max-width: 900px) {
       main {
         flex-direction: column;
         align-items: stretch;
         gap: 12px;
         min-height: unset;
       }
-      .sidebar {
-        min-width: unset;
-        width: 100%;
-        max-width: 100vw;
+      .sidebars-wrap {
         flex-direction: row;
-        flex-wrap: wrap;
-        gap: 14px;
-        align-self: stretch;
-        padding: 16px 4vw;
-        justify-content: space-between;
+        width: 100vw;
+        max-width: 100vw;
+        gap: 6vw;
+        justify-content: space-around;
+        min-width: unset;
+        max-width: unset;
+      }
+      .sidebar, .uploadbar {
+        min-width: unset;
+        width: 48vw;
+        max-width: 48vw;
+        padding: 13px 2vw;
       }
       .human-container {
-        width: 95vw;
-        max-width: 330px;
-        height: 60vw;
-        max-height: 70vw;
-        min-height: 320px;
+        width: 98vw;
+        min-height: 440px;
+        max-width: 350px;
       }
-      svg {
-        width: 100% !important;
-        height: auto !important;
-      }
+      .body-outline { width: 100% !important; height: auto !important; }
       .outfit-label,
-      .img-head,
-      .img-upper,
-      .img-legs,
-      .img-feet,
+      .part-img,
       .btn-head,
       .btn-upper,
       .btn-legs,
-      .btn-feet,
-      .upload-btn {
-        /* scale down for mobile */
-        transform: scale(0.8) translateX(-62.5%);
-        left: 62.5%;
+      .btn-feet {
+        transform: scale(0.85) translateX(-58%);
+        left: 58%;
       }
       .preset-list {
         max-height: 60px;
@@ -288,54 +258,53 @@
     Paulinos spinta
   </header>
   <main>
+    <div class="sidebars-wrap">
+      <div class="uploadbar">
+        <label>Upload photos:</label>
+        <button onclick="triggerFile('head')" title="Upload photo for head">📷 Head</button>
+        <input type="file" accept="image/*" id="file-head" onchange="handlePhoto('head')">
+        <button onclick="triggerFile('upper')" title="Upload photo for upper body">📷 Upper</button>
+        <input type="file" accept="image/*" id="file-upper" onchange="handlePhoto('upper')">
+        <button onclick="triggerFile('legs')" title="Upload photo for legs">📷 Legs</button>
+        <input type="file" accept="image/*" id="file-legs" onchange="handlePhoto('legs')">
+        <button onclick="triggerFile('feet')" title="Upload photo for feet">📷 Feet</button>
+        <input type="file" accept="image/*" id="file-feet" onchange="handlePhoto('feet')">
+      </div>
+      <div class="sidebar">
+        <button onclick="randomizeOutfit()" aria-label="Randomize outfit">🎲 Randomize</button>
+        <button onclick="savePreset()" aria-label="Save current outfit as preset">💾 Save Preset</button>
+        <label style="margin-bottom:0.3em;">Preset Library:</label>
+        <ul class="preset-list" id="presetList"></ul>
+      </div>
+    </div>
     <div class="human-container">
-      <svg width="260" height="500" viewBox="0 0 260 500" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 0; top: 0;">
-        <!-- Head -->
-        <ellipse cx="130" cy="60" rx="38" ry="38" stroke="var(--outline)" stroke-width="5" fill="none"/>
-        <!-- Upper body -->
-        <rect x="80" y="98" width="100" height="120" rx="45" stroke="var(--outline)" stroke-width="5" fill="none"/>
-        <!-- Legs -->
-        <rect x="110" y="218" width="40" height="180" rx="19" stroke="var(--outline)" stroke-width="5" fill="none"/>
-        <!-- Feet -->
-        <ellipse cx="130" cy="445" rx="34" ry="25" stroke="var(--outline)" stroke-width="5" fill="none"/>
+      <!-- SVG Outline for reference -->
+      <svg class="body-outline" width="320" height="720" viewBox="0 0 320 720">
+        <ellipse cx="180" cy="70" rx="48" ry="48" stroke="#3d6652" stroke-width="5" fill="none"/>
+        <rect x="70" y="120" width="180" height="130" rx="65" stroke="#3d6652" stroke-width="5" fill="none"/>
+        <rect x="68" y="320" width="143" height="230" rx="32" stroke="#3d6652" stroke-width="5" fill="none"/>
+        <ellipse cx="147" cy="600" rx="60" ry="35" stroke="#3d6652" stroke-width="5" fill="none"/>
       </svg>
-      <!-- Image overlays for parts -->
-      <img id="img-head"    class="part-img img-head"    alt="Head"    hidden>
-      <img id="img-upper"   class="part-img img-upper"   alt="Upper"   hidden>
-      <img id="img-legs"    class="part-img img-legs"    alt="Legs"    hidden>
-      <img id="img-feet"    class="part-img img-feet"    alt="Feet"    hidden>
-      <!-- Upload buttons for each part and hidden file inputs -->
-      <button class="upload-btn upload-head" onclick="triggerFile('head')" title="Upload photo for head">📷</button>
-      <input type="file" accept="image/*" id="file-head" onchange="handlePhoto('head')">
-      <button class="upload-btn upload-upper" onclick="triggerFile('upper')" title="Upload photo for upper body">📷</button>
-      <input type="file" accept="image/*" id="file-upper" onchange="handlePhoto('upper')">
-      <button class="upload-btn upload-legs" onclick="triggerFile('legs')" title="Upload photo for legs">📷</button>
-      <input type="file" accept="image/*" id="file-legs" onchange="handlePhoto('legs')">
-      <button class="upload-btn upload-feet" onclick="triggerFile('feet')" title="Upload photo for feet">📷</button>
-      <input type="file" accept="image/*" id="file-feet" onchange="handlePhoto('feet')">
+      <!-- Outfit piece images, shown at their original size and positioned at the top of each part -->
+      <img id="img-head"  class="part-img" src="" alt="Head" hidden>
+      <img id="img-upper" class="part-img" src="" alt="Upper Body" hidden>
+      <img id="img-legs"  class="part-img" src="" alt="Legs" hidden>
+      <img id="img-feet"  class="part-img" src="" alt="Feet" hidden>
       <!-- Transparent, but visible, buttons for each body part -->
       <button class="part-btn btn-head" aria-label="Choose hat or headwear" title="Choose hat or headwear" onclick="choosePart('head')">👒</button>
       <button class="part-btn btn-upper" aria-label="Choose shirt or dress" title="Choose shirt or dress" onclick="choosePart('upper')">👕</button>
       <button class="part-btn btn-legs" aria-label="Choose pants or skirt" title="Choose pants or skirt" onclick="choosePart('legs')">👖</button>
       <button class="part-btn btn-feet" aria-label="Choose shoes" title="Choose shoes" onclick="choosePart('feet')">👟</button>
     </div>
-    <div class="sidebar">
-      <button onclick="randomizeOutfit()" aria-label="Randomize outfit">🎲 Randomize</button>
-      <button onclick="savePreset()" aria-label="Save current outfit as preset">💾 Save Preset</button>
-      <label style="margin-bottom:0.3em;">Preset Library:</label>
-      <ul class="preset-list" id="presetList"></ul>
-    </div>
   </main>
   <footer>
     Spinta atnaujinta 2025-08-11
   </footer>
   <script>
-    // --- Outfit logic and persistence ---
     let outfit = { head: null, upper: null, legs: null, feet: null };
     let outfitPhotos = { head: null, upper: null, legs: null, feet: null };
 
     let presets = [];
-    // Load presets from localStorage
     function loadPresets() {
       try {
         const data = localStorage.getItem('presets');
@@ -346,20 +315,16 @@
         presets = [];
       }
     }
-    // Save presets to localStorage
     function persistPresets() {
       localStorage.setItem('presets', JSON.stringify(presets));
     }
 
-    // Options for each part
     const partOptions = {
       head: ['Cap', 'Hat', 'Bandana', 'Nothing'],
       upper: ['T-shirt', 'Jacket', 'Dress', 'Sweater', 'Shirt'],
       legs: ['Jeans', 'Skirt', 'Shorts', 'Trousers'],
       feet: ['Sneakers', 'Boots', 'Sandals', 'Dress shoes']
     };
-
-    // --- UI Logic ---
 
     function choosePart(part) {
       let options = partOptions[part] || [];
@@ -427,7 +392,6 @@
       }
     }
 
-    // --- Display outfit labels on figure ---
     function displayOutfit() {
       document.querySelectorAll('.outfit-label').forEach(el => el.remove());
       const container = document.querySelector('.human-container');
@@ -447,11 +411,9 @@
       });
     }
 
-    // --- PHOTO UPLOAD logic ---
     function triggerFile(part) {
       document.getElementById('file-' + part).click();
     }
-
     function handlePhoto(part) {
       const input = document.getElementById('file-' + part);
       const file = input.files && input.files[0];
@@ -460,26 +422,17 @@
         alert('Please upload an image file!');
         return;
       }
-      // Optionally limit file size
-      if (file.size > 2 * 1024 * 1024) {
-        alert('Image too large! Max size: 2MB');
+      if (file.size > 7 * 1024 * 1024) {
+        alert('Image too large! Max size: 7MB');
         return;
       }
       const reader = new FileReader();
-      reader.onload = async function(e) {
-        outfitPhotos[part] = e.target.result; // Data URL
+      reader.onload = function(e) {
+        outfitPhotos[part] = e.target.result;
         displayPhotos();
-
-        // --- GITHUB REPO UPLOAD INTEGRATION ---
-        // To upload to your repo, you must POST this image (e.target.result) to your backend,
-        // which will then use GitHub API to PUT/POST the file in your desired path.
-        // For security, never expose a GitHub token in the browser!
-        // For demo, this only saves locally.
-        // Example: await uploadPhotoToGitHub(part, file);
       }
       reader.readAsDataURL(file);
     }
-
     function displayPhotos() {
       ['head','upper','legs','feet'].forEach(part => {
         const img = document.getElementById('img-' + part);
@@ -492,22 +445,23 @@
       });
     }
 
-    // Placeholder for GitHub photo upload
-    async function uploadPhotoToGitHub(part, file) {
-      // Not implemented: you need a backend or GitHub Action for this!
-      // 1. Send 'file' to your backend (e.g. POST via fetch)
-      // 2. Backend authenticates and uploads to your repo: e.g. /wardrobe-images/{part}-{Date.now()}.jpg
-      // 3. Backend returns the image URL or path in the repo.
-      // 4. You can store this URL instead of the DataURL in outfitPhotos[part]
+    // Demo: preload image 3 (shirt), 2 (pants), 4 (feet) on first load
+    if (!localStorage.getItem('demo-photos-used')) {
+      // These links should be replaced with your actual hosted images or DataURLs
+      document.getElementById('img-upper').src = "https://user-images.githubusercontent.com/16621517/278916045-2b19e3bd-5e5a-4b6d-8f6f-e1d8fcf279ae.png";
+      outfitPhotos.upper = "https://user-images.githubusercontent.com/16621517/278916045-2b19e3bd-5e5a-4b6d-8f6f-e1d8fcf279ae.png";
+      document.getElementById('img-legs').src = "https://user-images.githubusercontent.com/16621517/278916048-9d1c7cff-1f7d-4e2f-bf14-8c4e82b5f7e6.png";
+      outfitPhotos.legs = "https://user-images.githubusercontent.com/16621517/278916048-9d1c7cff-1f7d-4e2f-bf14-8c4e82b5f7e6.png";
+      document.getElementById('img-feet').src = "https://user-images.githubusercontent.com/16621517/278916050-0b5e6e6d-1d35-4d0e-9d36-ea9a6a9c7c11.png";
+      outfitPhotos.feet = "https://user-images.githubusercontent.com/16621517/278916050-0b5e6e6d-1d35-4d0e-9d36-ea9a6a9c7c11.png";
+      localStorage.setItem('demo-photos-used', '1');
     }
 
-    // --- Initial load ---
     loadPresets();
     updatePresetList();
     displayOutfit();
     displayPhotos();
 
-    // Save current outfit and images in localStorage for session persistence
     window.addEventListener('beforeunload', () => {
       localStorage.setItem('currentOutfit', JSON.stringify(outfit));
       localStorage.setItem('currentPhotos', JSON.stringify(outfitPhotos));
