@@ -48,20 +48,49 @@
     /* Overlay buttons on SVG */
     .part-btn {
       position: absolute;
-      background: rgba(220, 255, 241, 0.01);
-      border: none;
+      background: rgba(220, 255, 241, 0.28); /* More visible, but still transparent */
+      border: 2px dashed #6fdca2;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, border-color 0.2s;
       z-index: 2;
+      outline: none;
+    }
+    .part-btn:focus {
+      border-color: #3d6652;
+      background: rgba(104, 194, 141, 0.18);
     }
     .part-btn:hover {
       background: rgba(104, 194, 141, 0.13);
+      border-color: #3d6652;
     }
     /* Positioning each part */
     .btn-head { left: 90px; top: 20px; width: 80px; height: 80px; border-radius: 50%; }
     .btn-upper { left: 70px; top: 90px; width: 120px; height: 110px; border-radius: 50px; }
     .btn-legs { left: 100px; top: 200px; width: 60px; height: 180px; border-radius: 30px; }
     .btn-feet { left: 100px; top: 380px; width: 60px; height: 70px; border-radius: 20px; }
+
+    /* Outfit labels */
+    .outfit-label {
+      pointer-events: none;
+      font-size: 1rem;
+      color: #29443a;
+      box-shadow: 0 1px 4px rgba(60,60,60,0.08);
+      font-weight: bold;
+      background: rgba(255,255,255,0.68);
+      border-radius: 6px;
+      position: absolute;
+      width: 70px;
+      text-align: center;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      padding: 2px 0;
+      user-select: none;
+    }
+    .label-head { top: 58px;}
+    .label-upper { top: 155px;}
+    .label-legs { top: 300px;}
+    .label-feet { top: 445px;}
 
     /* Sidebar for controls */
     .sidebar {
@@ -87,8 +116,9 @@
       transition: background 0.18s;
       margin-bottom: 2px;
     }
-    .sidebar button:hover {
+    .sidebar button:hover, .sidebar button:focus {
       background: #b2e7c9;
+      outline: 2px solid #3d6652;
     }
     .preset-list {
       margin-top: 7px;
@@ -104,9 +134,27 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 0.98rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     .preset-list li:hover {
       background: #c5ecd7;
+    }
+    .preset-action-btn {
+      background: none;
+      border: none;
+      color: #3d6652;
+      font-size: 1.1em;
+      cursor: pointer;
+      padding: 0 5px;
+      transition: color 0.15s;
+      border-radius: 3px;
+      margin-left: 6px;
+    }
+    .preset-action-btn:hover {
+      color: #ce3b3b;
+      background: #fbe8e8;
     }
     footer {
       text-align: center;
@@ -134,15 +182,16 @@
         <!-- Feet -->
         <ellipse cx="130" cy="445" rx="34" ry="25" stroke="var(--outline)" stroke-width="5" fill="none"/>
       </svg>
-      <!-- Transparent buttons for each body part -->
-      <button class="part-btn btn-head" title="Choose hat or headwear" onclick="choosePart('head')"></button>
-      <button class="part-btn btn-upper" title="Choose shirt or dress" onclick="choosePart('upper')"></button>
-      <button class="part-btn btn-legs" title="Choose pants or skirt" onclick="choosePart('legs')"></button>
-      <button class="part-btn btn-feet" title="Choose shoes" onclick="choosePart('feet')"></button>
+      <!-- Transparent, but visible, buttons for each body part -->
+      <button class="part-btn btn-head" aria-label="Choose hat or headwear" title="Choose hat or headwear" onclick="choosePart('head')"></button>
+      <button class="part-btn btn-upper" aria-label="Choose shirt or dress" title="Choose shirt or dress" onclick="choosePart('upper')"></button>
+      <button class="part-btn btn-legs" aria-label="Choose pants or skirt" title="Choose pants or skirt" onclick="choosePart('legs')"></button>
+      <button class="part-btn btn-feet" aria-label="Choose shoes" title="Choose shoes" onclick="choosePart('feet')"></button>
+      <!-- Outfit labels will be injected here -->
     </div>
     <div class="sidebar">
-      <button onclick="randomizeOutfit()">🎲 Randomize</button>
-      <button onclick="savePreset()">💾 Save Preset</button>
+      <button onclick="randomizeOutfit()" aria-label="Randomize outfit">🎲 Randomize</button>
+      <button onclick="savePreset()" aria-label="Save current outfit as preset">💾 Save Preset</button>
       <label style="margin-bottom:0.3em;">Preset Library:</label>
       <ul class="preset-list" id="presetList"></ul>
     </div>
@@ -151,36 +200,69 @@
     Spinta atnaujinta 2025-08-11
   </footer>
   <script>
-    // Placeholder JS for interactivity
-
-    // Demo structure for outfit state
+    // --- Outfit logic and persistence ---
     let outfit = { head: null, upper: null, legs: null, feet: null };
+
     let presets = [];
+    // Load presets from localStorage
+    function loadPresets() {
+      try {
+        const data = localStorage.getItem('presets');
+        if (data) {
+          presets = JSON.parse(data);
+        }
+      } catch (e) {
+        presets = [];
+      }
+    }
+    // Save presets to localStorage
+    function persistPresets() {
+      localStorage.setItem('presets', JSON.stringify(presets));
+    }
+
+    // Options for each part
+    const partOptions = {
+      head: ['Cap', 'Hat', 'Bandana', 'Nothing'],
+      upper: ['T-shirt', 'Jacket', 'Dress', 'Sweater', 'Shirt'],
+      legs: ['Jeans', 'Skirt', 'Shorts', 'Trousers'],
+      feet: ['Sneakers', 'Boots', 'Sandals', 'Dress shoes']
+    };
+
+    // --- UI Logic ---
 
     function choosePart(part) {
-      alert(`Upload or select an image for the "${part}" part. (Not implemented here)`);
-      // Here, open a file dialog or modal to upload/select images for the part.
+      // Show a prompt with options, fallback to prompt if not supported
+      let options = partOptions[part] || [];
+      let msg = `Choose for ${part}:\n`;
+      options.forEach((opt, idx) => { msg += `${idx + 1}. ${opt}\n`; });
+      let choice = prompt(msg, outfit[part] || "");
+      // Allow number or name selection
+      if (!choice) return;
+      let idx = Number(choice) - 1;
+      if (!isNaN(idx) && idx >= 0 && idx < options.length) {
+        outfit[part] = options[idx];
+      } else if (options.includes(choice)) {
+        outfit[part] = choice;
+      } else {
+        alert("Not a valid option.");
+        return;
+      }
+      displayOutfit();
     }
 
     function randomizeOutfit() {
-      // For demo, just assign random names
-      const sample = {
-        head: ['Cap', 'Hat', 'Nothing'],
-        upper: ['T-shirt', 'Jacket', 'Dress', 'Sweater'],
-        legs: ['Jeans', 'Skirt', 'Shorts'],
-        feet: ['Sneakers', 'Boots', 'Sandals']
-      };
       for (let part in outfit) {
-        const options = sample[part];
+        const options = partOptions[part];
         outfit[part] = options[Math.floor(Math.random() * options.length)];
       }
-      alert('Randomized outfit: ' + JSON.stringify(outfit));
+      displayOutfit();
     }
 
     function savePreset() {
       const name = prompt('Enter a name for this outfit preset:');
       if (name) {
         presets.push({ name, outfit: { ...outfit } });
+        persistPresets();
         updatePresetList();
       }
     }
@@ -190,15 +272,69 @@
       ul.innerHTML = '';
       presets.forEach((preset, idx) => {
         const li = document.createElement('li');
-        li.textContent = preset.name;
-        li.onclick = () => {
-          outfit = { ...preset.outfit };
-          alert('Loaded preset: ' + preset.name + '\n' + JSON.stringify(outfit));
-        };
+        li.innerHTML = `
+          <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${preset.name}</span>
+          <button class="preset-action-btn" aria-label="Load preset ${preset.name}" title="Load preset" onclick="loadPreset(${idx})">⏎</button>
+          <button class="preset-action-btn" aria-label="Delete preset ${preset.name}" title="Delete preset" onclick="deletePreset(${idx})">🗑</button>
+        `;
         ul.appendChild(li);
       });
     }
-    // Could add localStorage support here for persistence
+
+    function loadPreset(idx) {
+      if (presets[idx]) {
+        outfit = { ...presets[idx].outfit };
+        displayOutfit();
+      }
+    }
+
+    function deletePreset(idx) {
+      if (confirm(`Delete preset "${presets[idx].name}"?`)) {
+        presets.splice(idx, 1);
+        persistPresets();
+        updatePresetList();
+      }
+    }
+
+    // --- Display outfit labels on figure ---
+    function displayOutfit() {
+      // Remove old labels
+      document.querySelectorAll('.outfit-label').forEach(el => el.remove());
+      const container = document.querySelector('.human-container');
+      const labelMap = {
+        head: { class: 'label-head', val: outfit.head },
+        upper: { class: 'label-upper', val: outfit.upper },
+        legs: { class: 'label-legs', val: outfit.legs },
+        feet: { class: 'label-feet', val: outfit.feet }
+      };
+      Object.entries(labelMap).forEach(([part, {class: cls, val}]) => {
+        if (val) {
+          const span = document.createElement('span');
+          span.className = `outfit-label ${cls}`;
+          span.textContent = val;
+          container.appendChild(span);
+        }
+      });
+    }
+
+    // --- Initial load ---
+    loadPresets();
+    updatePresetList();
+    displayOutfit();
+
+    // Optional: save current outfit in localStorage for session persistence
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('currentOutfit', JSON.stringify(outfit));
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('currentOutfit');
+      if (saved) {
+        try {
+          outfit = JSON.parse(saved);
+          displayOutfit();
+        } catch(e){}
+      }
+    });
   </script>
 </body>
 </html>
